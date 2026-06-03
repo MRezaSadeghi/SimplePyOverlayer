@@ -5,7 +5,11 @@ ROOT = Path(__file__).parent.parent
 # DATA FOLDERS
 RAW_TEXT_FOLDER = ROOT / "data" / "raw_text"
 RAW_VIDEO_FOLDER = ROOT / "data" / "raw_video"
-EXPORT_FOLDER = ROOT / "data" / "exports"
+TEMP_FOLDER = ROOT / "data" / "temp"
+
+# temp files
+TEMP_VIDEO = TEMP_FOLDER / "temp_video.mp4"
+TEMP_ASS = TEMP_FOLDER / "temp_data.ass"
 
 # BM files
 SAMPLE_INFO = RAW_TEXT_FOLDER / "auto_generate_sample.csv"

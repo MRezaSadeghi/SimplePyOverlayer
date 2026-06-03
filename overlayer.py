@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import tkinter as tk
 from pathlib import Path
@@ -12,15 +13,10 @@ from logrecorder.logger import logger
 
 
 class Overlayer:
-    def __init__(
-        self,
-        target_file_name: str = "sample",
-    ):
-        self.text_folder = paths.RAW_TEXT_FOLDER
-        self.video_folder = paths.RAW_VIDEO_FOLDER
-        self.export_folder = paths.EXPORT_FOLDER
-        self.ass_file = self.export_folder / f"{target_file_name}.ass"
-        self.out_vid_file = self.export_folder / f"{target_file_name}.mp4"
+    def __init__(self):
+
+        self.ass_file = paths.TEMP_ASS
+        self.out_vid_file = paths.TEMP_VIDEO
         self.init_path = Path(__file__).parent
 
         self.required_cols = ["frame"]
@@ -98,6 +94,29 @@ class Overlayer:
     def get_data_info(self, data_path: Path):
         data = pd.read_csv(data_path)
         return {"data": data, "cols": data.columns}
+
+    def ask_save_path(
+        self, title="Save File As", filetypes=None, initial_dir=None, initial_file=""
+    ):
+        """Ask user for save path"""
+        root = tk.Tk()
+        root.withdraw()
+
+        if filetypes is None:
+            filetypes = [("All files", "*.*")]
+
+        if initial_dir and isinstance(initial_dir, Path):
+            initial_dir = str(initial_dir)
+
+        save_path = filedialog.asksaveasfilename(
+            title=title,
+            filetypes=filetypes,
+            initialdir=initial_dir,
+            initialfile=initial_file,
+        )
+
+        root.destroy()
+        return Path(save_path) if save_path else None
 
     def _get_style_from_json(self) -> str:
         config_path = paths.VISUAL_SETTINGS
@@ -324,3 +343,16 @@ class Overlayer:
             data_info["data"], positions_dict, ass_init, fps=vid_info["fps"]
         )
         self.generate_video(vid_path)
+
+        # save as
+        destination = self.ask_save_path(
+            title="Save Video As",
+            filetypes=[("Video files", "*.mp4 *.mkv"), ("All files", "*.*")],
+            initial_dir=Path.home() / "Videos",
+            initial_file=self.out_vid_file,
+        )
+
+        if destination:
+            # Copy the file (keeps original)
+            shutil.copy2(self.out_vid_file, destination)
+            print(f"Copied to: {destination}")
